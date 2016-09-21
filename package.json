@@ -1,0 +1,26 @@
+{
+  "name": "my-records",
+  "version": "1.0.0",
+  "description": "Im makin an app for managing my records",
+  "main": "server.js",
+  "dependencies": {
+    "config": "^1.21.0",
+    "express": "^4.14.0",
+    "q": "^1.4.1",
+    "sqlite3": "^3.1.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jordanwilcken/my-records.git"
+  },
+  "author": "Jordan Wilcken",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jordanwilcken/my-records/issues"
+  },
+  "homepage": "https://github.com/jordanwilcken/my-records#readme"
+}
