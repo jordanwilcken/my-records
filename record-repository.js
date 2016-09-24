@@ -4,13 +4,6 @@ var qPromises = require('q');
 
 var errs = require('./errs.js');
 
-function checkIdLegit(id) {
-  return id
-    &&id.constructor.name === "Number"
-    && id > 0
-    && Math.trunc(id) === id;
-}
-
 function checkDescLegit(record) {
   var
     desc = record.desc;
