@@ -1,3 +1,5 @@
+'use strict';
+
 var sqlite = require('sqlite3').verbose();
 var config = require('config');
 var qPromises = require('q');
@@ -52,9 +54,9 @@ function get(id) {
 
   function onGetFinished(err, row) {
     if (err) {
-      deferred.reject("there was a problem getting the record");
+      deferred.reject(errs.SOME_DB_ERR);
     } else if (!row) {
-      deferred.reject("record not found");
+      deferred.reject(errs.RECORD_NOT_FOUND);
     } else {
       deferred.resolve(row);
     }
