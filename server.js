@@ -1,6 +1,7 @@
 'use strict';
 
 var
+  qPromises = require('q'),
   http    = require( 'http'     ),
   express = require( 'express'  ),
   logger = require('morgan'),
@@ -18,6 +19,28 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(router);
 router.use(logger('combined'));
+
+app.all('*', function(request, response, next) {
+  response.redirect('/login');
+});
+
+app.post('/login', function(request, response) {
+  function checkPassword() {
+    var
+      deferred = qPromises.defer();
+
+    bcrypt.compare(request.body.password, hash, function(err, res) {
+      if (err || !res) {
+        deferred.reject('sorry, the credentials are incorrect.');
+      } else {
+        deferred.resolve('I now give you happy token thing!');
+      }
+    });
+
+    return deferred.promise;
+  }
+    checkPassword().then(sendToken, reportPasswordError);
+});
 
 app.get('/:id', function(request, response) {
   function returnData(data) {
@@ -38,6 +61,8 @@ app.get('/:id', function(request, response) {
 });
 
 app.post('/', function(req, res) {
+  recordRepo.add(req.body)
+    .then((val) => response.send("success!"), handleError);
 });
 
 // ----------------- BEGIN START SERVER -------------------
