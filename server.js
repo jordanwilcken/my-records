@@ -10,6 +10,8 @@ var
   express = require( 'express'  ),
   logger = require('morgan'),
   bodyParser = require('body-parser'),
+  upload = require('multer')(),
+  
 
   recordRepo = require('./record-repository.js'),
   errs = require('./errs.js'),
@@ -20,6 +22,7 @@ var
   server  = http.createServer( app ),
   authTokens = [];
 
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(router);
@@ -51,11 +54,29 @@ function checkAuthenticated(request, response, next) {
 
     authTokenNotInList = authTokens.indexOf(authToken) === -1;
 
-  if (authTokenNotInList) {
-    response.status(401).send('You are not authenticated');
-  } else {
-    next();
-  }
+    console.log('me authToken ' + authToken);
+
+next();
+
+  //if (authTokenNotInList) {
+  //  response.status(401).send('You are not authenticated');
+  //  return;
+  //}
+
+  //webToken.verify(authToken, config.get('secret'), function(err, decoded) {
+  //  var
+  //    message;
+
+  //  if (err) {
+  //    authTokens = authTokens.filter(token => token != authToken);
+  //    message = err.name === 'TokenExpiredError'
+  //      ? 'Your authentication token has expired, and you need to login again.' 
+  //      : 'Invalid authentication token.'
+  //    response.status(401).send(message);
+  //  } else {
+  //    next();
+  //  }
+  //});
 }
 
 app.all('*', checkAuthenticated);
@@ -76,6 +97,24 @@ app.get('/:id', function(request, response) {
 
   recordRepo.get(request.params.id)
     .then(returnData, handleError);
+});
+
+app.post('/', upload.single('pdf'), function(req, res) {
+  recordRepo.add({desc: req.body.desc, pdf: req.file.buffer}).then(
+    res.send.bind(res),
+    res.status(400).send.bind(res));
+});
+
+app.post('/:id', upload.single('pdf'), function(req, res) {
+  var
+    proposedID = req.body.newID && req.body.newID.length > 0
+      ? req.body.newID
+      : req.params.id;
+
+  recordRepo.update(req.params.id, {id: proposedID, desc: req.body.desc, pdf: req.file.buffer})
+    .then(
+      res.send.bind(res),
+      res.status(400).send.bind(res));
 });
 
 // ----------------- BEGIN START SERVER -------------------

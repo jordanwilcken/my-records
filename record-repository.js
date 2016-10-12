@@ -88,9 +88,8 @@ function add(record) {
     deferred = qPromises.defer();
 
   if (!checkDescLegit(record) || !checkBufferLegit(record)) {
-    deferred.reject(new Error(errs.INVALID_RECORD));
+    deferred.reject(errs.INVALID_RECORD);
   } else {
-
     function addAndClose(db) {
       db.run(
 		"INSERT INTO records (desc, pdf) VALUES(?, ?)",
@@ -107,19 +106,21 @@ function add(record) {
   return deferred.promise;
 }
 
-function update(record) {
+function update(id, record) {
   var
     deferred = qPromises.defer();
   
-  if (!checkDescLegit(record) || !checkBufferLegit(record)) {
+  if (!checkDescLegit(record) || !checkBufferLegit(record)
+    || /^\d+$/.test(record.id) === false) {
     deferred.reject(new Error(errs.INVALID_RECORD));
   } else {
     function updateRowAndClose(db) {
       db.run(
-		'UPDATE records SET desc = ?, pdf = ? WHERE rowid = ?',
+		'UPDATE records SET desc = ?, pdf = ?, rowid = ? WHERE rowid = ?',
 		record.desc,
 		record.pdf,
 		record.id,
+        id,
 		onRunFinished(deferred));
       db.close();
     }
