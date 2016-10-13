@@ -22,10 +22,10 @@ var
   server  = http.createServer( app ),
   authTokens = [];
 
-app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(router);
+app.use(express.static(__dirname + '/public'));
 router.use(logger('combined'));
 
 app.post('/login', function(request, response) {
@@ -38,7 +38,9 @@ app.post('/login', function(request, response) {
 
   newAuthToken = webToken.sign({ uuid: uuid.v1() }, config.get('secret'), { expiresIn: '2h' });
   authTokens.push(newAuthToken); 
-  response.send(newAuthToken);
+  response
+    .cookie('authToken', 'just pretends')
+    .send(newAuthToken);
 });
 
 function checkAuthenticated(request, response, next) {
@@ -54,32 +56,29 @@ function checkAuthenticated(request, response, next) {
 
     authTokenNotInList = authTokens.indexOf(authToken) === -1;
 
-    console.log('me authToken ' + authToken);
+  if (authTokenNotInList) {
+    response.status(401).send('You are not authenticated');
+    return;
+  }
 
-next();
+  webToken.verify(authToken, config.get('secret'), function(err, decoded) {
+    var
+      message;
 
-  //if (authTokenNotInList) {
-  //  response.status(401).send('You are not authenticated');
-  //  return;
-  //}
-
-  //webToken.verify(authToken, config.get('secret'), function(err, decoded) {
-  //  var
-  //    message;
-
-  //  if (err) {
-  //    authTokens = authTokens.filter(token => token != authToken);
-  //    message = err.name === 'TokenExpiredError'
-  //      ? 'Your authentication token has expired, and you need to login again.' 
-  //      : 'Invalid authentication token.'
-  //    response.status(401).send(message);
-  //  } else {
-  //    next();
-  //  }
-  //});
+    if (err) {
+      authTokens = authTokens.filter(token => token != authToken);
+      message = err.name === 'TokenExpiredError'
+        ? 'Your authentication token has expired, and you need to login again.' 
+        : 'Invalid authentication token.'
+      response.status(401).send(message);
+    } else {
+      next();
+    }
+  });
 }
 
 app.all('*', checkAuthenticated);
+
 
 app.get('/:id', function(request, response) {
   function returnData(data) {
