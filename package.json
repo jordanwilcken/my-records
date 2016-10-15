@@ -7,6 +7,7 @@
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.15.2",
     "config": "^1.21.0",
+    "cookie-parser": "^1.4.3",
     "express": "^4.14.0",
     "guid": "0.0.12",
     "jsonwebtoken": "^7.1.9",

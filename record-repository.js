@@ -109,12 +109,15 @@ function add(record) {
 function update(id, record) {
   var
     deferred = qPromises.defer();
+
+console.log('update started');
   
   if (!checkDescLegit(record) || !checkBufferLegit(record)
     || /^\d+$/.test(record.id) === false) {
     deferred.reject(new Error(errs.INVALID_RECORD));
   } else {
     function updateRowAndClose(db) {
+console.log('using db');
       db.run(
 		'UPDATE records SET desc = ?, pdf = ?, rowid = ? WHERE rowid = ?',
 		record.desc,

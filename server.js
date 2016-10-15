@@ -4,6 +4,7 @@ var
   config = require('config'),
   qPromises = require('q'),
   bcrypt = require('bcrypt-nodejs'),
+  cookieParser = require('cookie-parser'),
   webToken = require('jsonwebtoken'),
   uuid = require('node-uuid'),
   http    = require( 'http'     ),
@@ -20,61 +21,51 @@ var
   app     = express(),
   router = express.Router(),
   server  = http.createServer( app ),
-  authTokens = [];
+  authCookies = [];
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(cookieParser(config.get('secret')));
 app.use(router);
 app.use(express.static(__dirname + '/public'));
 router.use(logger('combined'));
 
+function twoHoursFromNow() {
+  var
+    millisecondsPerSecond = 1000,
+    secondsPerMinute = 60,
+    minutesPerHour = 60,
+    twoHours = 2;
+
+  return new Date(Date.now() + twoHours * minutesPerHour * secondsPerMinute * millisecondsPerSecond);
+}
+
 app.post('/login', function(request, response) {
-  var newAuthToken;
+  var newAuthCookieValue;
 
   if (!bcrypt.compareSync(request.body.password, config.get('password'))) {
     response.status(401).send("invalid credentials");
     return;
   }
 
-  newAuthToken = webToken.sign({ uuid: uuid.v1() }, config.get('secret'), { expiresIn: '2h' });
-  authTokens.push(newAuthToken); 
+  newAuthCookieValue = uuid.v1();
+  authCookies.push(newAuthCookieValue); 
   response
-    .cookie('authToken', 'just pretends')
-    .send(newAuthToken);
+    .cookie('authCookie', newAuthCookieValue, { signed: true, expires: twoHoursFromNow()})
+    .send();
 });
 
 function checkAuthenticated(request, response, next) {
   var
-    authToken = (function(authHeader) {
-      var
-        regexData = /Bearer (.+)$/.exec(authHeader);
+    authCookieNotInList = !request.signedCookies.authCookie
+      || authCookies.indexOf(request.signedCookies.authCookie) === -1;
 
-	  return regexData && regexData.length > 1
-        ? regexData[1]
-        : null;
-    }(request.get('Authorization'))),
-
-    authTokenNotInList = authTokens.indexOf(authToken) === -1;
-
-  if (authTokenNotInList) {
+  if (authCookieNotInList) {
     response.status(401).send('You are not authenticated');
     return;
   }
 
-  webToken.verify(authToken, config.get('secret'), function(err, decoded) {
-    var
-      message;
-
-    if (err) {
-      authTokens = authTokens.filter(token => token != authToken);
-      message = err.name === 'TokenExpiredError'
-        ? 'Your authentication token has expired, and you need to login again.' 
-        : 'Invalid authentication token.'
-      response.status(401).send(message);
-    } else {
-      next();
-    }
-  });
+  next();
 }
 
 app.all('*', checkAuthenticated);
@@ -108,9 +99,10 @@ app.post('/:id', upload.single('pdf'), function(req, res) {
   var
     proposedID = req.body.newID && req.body.newID.length > 0
       ? req.body.newID
-      : req.params.id;
+      : req.params.id,
+    buffer = req.file && req.file.buffer ? req.file.buffer : undefined;
 
-  recordRepo.update(req.params.id, {id: proposedID, desc: req.body.desc, pdf: req.file.buffer})
+  recordRepo.update(req.params.id, {id: proposedID, desc: req.body.desc, pdf: buffer})
     .then(
       res.send.bind(res),
       res.status(400).send.bind(res));
