@@ -74,14 +74,14 @@ function authCookieExpired(cookie) {
 }
 
 function checkAuthenticated(request, response, next) {
-  if (authCookieNotInList(request.signedCookies.authCookie)
-    || authCookieExpired(request.signedCookies.authCookie)) {
-    authCookies = authCookies.filter(function(cookie) { return cookie.cookieValue !== request.signedCookies.authCookie; });
-    response.status(401).send('You are not authenticated');
-    return;
-  }
+  //if (authCookieNotInList(request.signedCookies.authCookie)
+  //  || authCookieExpired(request.signedCookies.authCookie)) {
+  //  authCookies = authCookies.filter(function(cookie) { return cookie.cookieValue !== request.signedCookies.authCookie; });
+  //  response.status(401).send('You are not authenticated');
+  //  return;
+  //}
 
-  appLogger.log('function "checkAuthenticated" will now call function "next"');
+  //appLogger.log('function "checkAuthenticated" will now call function "next"');
   next();
 }
 

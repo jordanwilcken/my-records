@@ -1,10 +1,9 @@
 window.addEventListener('load', function() {
   var
-    idInput = document.getElementsByTagName('input')[0],
-    submit = document.getElementsByTagName('button')[0];
+    idInput = document.getElementsByName('recordID')[0];
 
   idInput.addEventListener('input', function() {
-    document.getElementsByTagName('form')[0]
+    document.getElementsByClassName('record-form')[0]
       .action = '../' + idInput.value; 
   });
 });

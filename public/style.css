@@ -1,3 +1,14 @@
 .not-displayed {
   display: none;
 }
+
+li {
+  border: solid;
+  cursor: pointer;
+  max-height: 10em;
+  overflow-y: scroll;
+}
+
+ul:hover {
+  background-color: lightblue;
+}
