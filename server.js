@@ -7,6 +7,8 @@ var
   bcrypt = require('bcrypt-nodejs'),
   cookieParser = require('cookie-parser'),
   uuid = require('node-uuid'),
+  qPromises = require('q'),
+
   http    = require( 'http'     ),
   express = require( 'express'  ),
   helmet = require('helmet'),
@@ -86,6 +88,28 @@ function checkAuthenticated(request, response, next) {
 }
 
 app.all('*', checkAuthenticated);
+
+app.all('*', function(request, response, next) {
+  response.redirect('/login');
+});
+
+app.post('/login', function(request, response) {
+  function checkPassword() {
+    var
+      deferred = qPromises.defer();
+
+    bcrypt.compare(request.body.password, hash, function(err, res) {
+      if (err || !res) {
+        deferred.reject('sorry, the credentials are incorrect.');
+      } else {
+        deferred.resolve('I now give you happy token thing!');
+      }
+    });
+
+    return deferred.promise;
+  }
+    checkPassword().then(sendToken, reportPasswordError);
+});
 
 app.get('/:id', function(request, response) {
   function returnData(data) {
