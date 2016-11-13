@@ -2,13 +2,17 @@
   display: none;
 }
 
-li {
+ul {
   border: solid;
-  cursor: pointer;
   max-height: 10em;
   overflow-y: scroll;
+  list-style-type: none;
 }
 
-ul:hover {
+li {
+  cursor: pointer;
+}
+
+li:hover {
   background-color: lightblue;
 }

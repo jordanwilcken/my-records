@@ -89,10 +89,6 @@ function checkAuthenticated(request, response, next) {
 
 app.all('*', checkAuthenticated);
 
-app.all('*', function(request, response, next) {
-  response.redirect('/login');
-});
-
 app.post('/login', function(request, response) {
   function checkPassword() {
     var
@@ -109,6 +105,10 @@ app.post('/login', function(request, response) {
     return deferred.promise;
   }
     checkPassword().then(sendToken, reportPasswordError);
+});
+
+app.get('/list', function(request, response) {
+  response.send(['first', 'second', 'third']);
 });
 
 app.get('/:id', function(request, response) {
