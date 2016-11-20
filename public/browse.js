@@ -4,7 +4,10 @@ window.addEventListener('load', function() {
 
     makeRecordsView = function(listEl) {
       return function(recordCollection) {
-        return new humble.RecordsView(listEl, new humble.RecordsViewModel(recordCollection));
+        return new humble.RecordsView(
+          listEl,
+          humble.itemElementFactory.make_li_element,
+          new humble.RecordsViewmodel(recordCollection));
       };
     },
 
