@@ -1,20 +1,23 @@
 window.addEventListener('load', function() {
   var
     recordRepo = new humble.RecordRepo(),
+    makeRecordsView = humble.viewFactory.makeRecordsView,
+    makeErrorView = humble.viewFactory.makeErrorView,
 
-    makeRecordsView = function(listEl) {
-      return function(recordCollection) {
-        return new humble.RecordsView(
-          listEl,
-          humble.itemElementFactory.make_li_element,
-          new humble.RecordsViewmodel(recordCollection));
+    appendTheView = function(view) {
+      function getElementVisitor() {
+        return {
+          visit: function(el) {
+            document.getElementById("browseView")
+              .appendChild(el);
+          }
+        };
       };
-    },
 
-    makeErrorView = function(err) { },
-
-    recordListEl = document.getElementsByTagName('ul')[0];
+      view.accept(getElementVisitor);
+    };
 
   recordRepo.getAllRecords()
-	.then(makeRecordsView(recordListEl), makeErrorView);
+	.then(makeRecordsView, makeErrorView)
+    .then(appendTheView, appendTheView);
 });

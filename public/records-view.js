@@ -1,15 +1,20 @@
 var humble = humble || {};
 
-humble.RecordsView = function(el, makeItemElement, recordsViewmodel) {
-  this.visit = function(record) {
-    var
-      itemElement = makeItemElement(record);
+humble.RecordsView = function(makeItemElement, recordsViewmodel) {
+  var viewElement = document.createElement('ul');
 
+  this.visit = function(record) {
+    var itemElement = makeItemElement(record);
     itemElement.onclick = function() {
       recordsViewmodel.getRecord(record.id);
     };
+    
+    viewElement.appendChild(itemElement);
+  };
 
-    el.appendChild(itemElement);
+  this.accept = function(getElementVisitor) {
+    getElementVisitor()
+      .visit(viewElement);
   };
 
   recordsViewmodel.accept(this);
