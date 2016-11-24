@@ -108,7 +108,13 @@ app.post('/login', function(request, response) {
 });
 
 app.get('/list', function(request, response) {
-  response.send(['first', 'second', 'third']);
+  recordRepo.getItems()
+    .then(
+      response.send.bind(response),
+      (err) => {
+        console.log("had an err with getItems " + err);
+        response.status(500).send();
+    });
 });
 
 app.get('/:id', function(request, response) {

@@ -56,8 +56,36 @@ function reportError(deferred) {
   }
 }
 
+function reportErr(err) {
+  appLogger.log('rejecting a promise with the error %s', err);
+}
+
 function getItems() {
-  console.log('havent implemented getItems yet'); 
+
+  function getRowsAndClose(db) {
+    var deferred = qPromises.defer();
+
+    function onGetFinished(err, rows) {
+      if (err) {
+        appLogger.log('db error while calling function "recordRepo.get - the error: ' + err);
+        deferred.reject(errs.SOME_DB_ERR);
+      } else if (!rows || rows.length === 0) {
+        appLogger.log('no rows fetched');
+        deferred.reject(errs.RECORD_NOT_FOUND);
+      } else {
+        appLogger.log(rows.length + 'rows retrieved.');
+        deferred.resolve(rows);
+      }
+    }
+
+    appLogger.log('now calling function "getRowsAndClose"');
+    db.all('SELECT rowid, desc FROM records', onGetFinished);
+    db.close();
+
+    return deferred.promise;
+  }
+
+  return connect().then(getRowsAndClose, reportErr);
 }
 
 function get(id) {
