@@ -119,7 +119,9 @@ app.get('/list', function(request, response) {
 
 app.get('/:id', function(request, response) {
   function returnData(data) {
-    response.send(data);
+    response
+      .set('Content-Type', 'application/pdf')
+      .send(data);
   }
 
   function handleError(err) {

@@ -101,23 +101,20 @@ function get(id) {
       appLogger.log('no rows fetched');
       deferred.reject(errs.RECORD_NOT_FOUND);
     } else {
-      appLogger.log(
-        'row retrieved: rowid=%n, desc=%s, with blob of length %d',
-        row.rowid,
-        row.desc,
-        row.pdf.length);
-      deferred.resolve(row);
+      appLogger.log('returning the ' + row.desc + ' pdf');
+      appLogger.log(row.pdf.constructor);
+      deferred.resolve(row.pdf);
     }
   }
 
-  function getRowAndClose(db) {
+  function getPdfAndClose(db) {
     appLogger.log('now calling function "getRowAndClose"');
-    db.get('SELECT * FROM records WHERE rowid = ?', id, onGetFinished);
+    db.get('SELECT desc, pdf FROM records WHERE rowid = ?', id, onGetFinished);
     db.close();
   }
 
   connect()
-    .then(getRowAndClose, reportError(deferred));
+    .then(getPdfAndClose, reportError(deferred));
 
   return deferred.promise;
 }

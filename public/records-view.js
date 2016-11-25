@@ -6,7 +6,7 @@ humble.RecordsView = function(makeItemElement, recordsViewmodel) {
   this.visit = function(record) {
     var itemElement = makeItemElement(record);
     itemElement.onclick = function() {
-      recordsViewmodel.getRecord(record.id);
+      recordsViewmodel.getRecord(record.rowid);
     };
     
     viewElement.appendChild(itemElement);
