@@ -4,9 +4,7 @@ var
   fs = require('fs'),
 
   config = require('config'),
-  bcrypt = require('bcrypt-nodejs'),
   cookieParser = require('cookie-parser'),
-  uuid = require('node-uuid'),
   qPromises = require('q'),
 
   http    = require( 'http'     ),
@@ -23,6 +21,8 @@ var
   port = process.env.PORT || 3000,
   app     = express(),
   router = express.Router(),
+  //rootRouter = require('./root-router.js'),
+  loginRouter = require('./login-router.js'),
   server  = http.createServer( app ),
   authCookies = [];
 
@@ -30,37 +30,9 @@ app.use(helmet());
 app.use(bodyParser.json()); // for parsing application/json
 app.use(cookieParser(config.get('secret')));
 app.use(router);
+app.use('/login', loginRouter);
 app.use(express.static(__dirname + '/public'));
 router.use(requestLogger('combined', {stream: fs.createWriteStream(__dirname + '/access.log', {flags: 'a'})}));
-
-function twoHoursFromNow() {
-  var
-    millisecondsPerSecond = 1000,
-    secondsPerMinute = 60,
-    minutesPerHour = 60,
-    twoHours = 2,
-    freturn = new Date(Date.now() + twoHours * minutesPerHour * secondsPerMinute * millisecondsPerSecond);
-
-  appLogger.log('function "twoHoursFromNow" will return %s', freturn); 
-  return freturn;
-}
-
-app.post('/login', function(request, response) {
-  var
-    newAuthCookieValue, newAuthCookieExpiration;
-
-  if (!bcrypt.compareSync(request.body.password, config.get('password'))) {
-    response.status(401).send("invalid credentials");
-    return;
-  }
-
-  newAuthCookieValue = uuid.v1();
-  newAuthCookieExpiration = twoHoursFromNow();
-  authCookies.push({ cookieValue: newAuthCookieValue, expiration: newAuthCookieExpiration }); 
-  response
-    .cookie('authCookie', newAuthCookieValue, { signed: true, expires: newAuthCookieExpiration})
-    .send();
-});
 
 function authCookieNotInList(cookie) {
   return authCookies.filter(function(aCookie) { return aCookie.cookieValue === cookie; }).length === 0;
@@ -88,24 +60,6 @@ function checkAuthenticated(request, response, next) {
 }
 
 app.all('*', checkAuthenticated);
-
-app.post('/login', function(request, response) {
-  function checkPassword() {
-    var
-      deferred = qPromises.defer();
-
-    bcrypt.compare(request.body.password, hash, function(err, res) {
-      if (err || !res) {
-        deferred.reject('sorry, the credentials are incorrect.');
-      } else {
-        deferred.resolve('I now give you happy token thing!');
-      }
-    });
-
-    return deferred.promise;
-  }
-    checkPassword().then(sendToken, reportPasswordError);
-});
 
 app.get('/list', function(request, response) {
   recordRepo.getItems()
