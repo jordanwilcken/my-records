@@ -22,7 +22,7 @@ var
   app     = express(),
   router = express.Router(),
   //rootRouter = require('./root-router.js'),
-  loginRouter = require('./login-router.js'),
+  loginRouterFactory = require('./login-router-factory.js'),
   server  = http.createServer( app ),
   authCookies = [];
 
@@ -30,7 +30,7 @@ app.use(helmet());
 app.use(bodyParser.json()); // for parsing application/json
 app.use(cookieParser(config.get('secret')));
 app.use(router);
-app.use('/login', loginRouter);
+app.use('/login', loginRouterFactory.create());
 app.use(express.static(__dirname + '/public'));
 router.use(requestLogger('combined', {stream: fs.createWriteStream(__dirname + '/access.log', {flags: 'a'})}));
 
