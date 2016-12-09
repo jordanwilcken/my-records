@@ -1,9 +1,6 @@
 {
   "name": "my-records",
   "version": "1.0.0",
-  "engines": {
-        "node": "4.6.0"
-  },
   "description": "Im makin an app for managing my records",
   "main": "server.js",
   "dependencies": {
@@ -16,7 +13,7 @@
     "multer": "^1.2.0",
     "node-uuid": "^1.4.7",
     "q": "^1.4.1",
-    "sqlite3": "^3.1.4"
+    "sqlite3": "^3.0.10"
   },
   "devDependencies": {},
   "scripts": {
