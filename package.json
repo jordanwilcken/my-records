@@ -1,6 +1,9 @@
 {
   "name": "my-records",
   "version": "1.0.0",
+  "engines": {
+        "node": "4.6.0"
+  },
   "description": "Im makin an app for managing my records",
   "main": "server.js",
   "dependencies": {
