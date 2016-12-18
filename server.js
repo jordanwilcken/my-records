@@ -15,7 +15,8 @@ var
   upload = require('multer')(),
 
   appLogger = require('./app-logger.js'),
-  recordRepo = require('./record-repository.js'),
+  recordRepo = require('./record-repository-factory.js')
+    .makeRecordRepo(),
   errs = require('./errs.js'),
 
   port = process.env.PORT || 3000,
@@ -95,7 +96,7 @@ app.post('/', upload.single('pdf'), function(req, res) {
   var buffer = req.file && req.file.buffer ? req.file.buffer : undefined;
   recordRepo.add({desc: req.body.desc, pdf: buffer}).then(
     res.send.bind(res),
-    res.status(400).send.bind(res));
+    err => res.status(400).send(err));
 });
 
 app.post('/:id', upload.single('pdf'), function(req, res) {
@@ -108,7 +109,7 @@ app.post('/:id', upload.single('pdf'), function(req, res) {
   recordRepo.update(req.params.id, {id: proposedID, desc: req.body.desc, pdf: buffer})
     .then(
       res.send.bind(res),
-      res.status(400).send.bind(res));
+      err => res.status(400).send(err));
 });
 
 // ----------------- BEGIN START SERVER -------------------
