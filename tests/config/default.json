@@ -1,0 +1,3 @@
+{
+  "connectionString": "Version=3;Pooling=true;Max Pool Size=100;Password=;Data Source=./test-db;Connection Timeout=20;"
+}
