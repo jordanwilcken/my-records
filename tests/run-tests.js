@@ -1,6 +1,6 @@
 var errors = [];
 
-errors.concat(
+errors = errors.concat(
   require('./test-records-repo.js')());
 
 reportErrors(errors);

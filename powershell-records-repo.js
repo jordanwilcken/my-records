@@ -5,8 +5,23 @@ function makeRecordsRepo(connectionString) {
 	  .execute();
   }
 
+  function burnAllRecords() {
+    return "";
+  }
+
+  function getMetadata() {
+    return {
+	  equals: function() {
+      	return true;
+	  }
+
+    };
+  }
+
   return {
-    addRecords: addRecords
+    addRecords: addRecords,
+	burnAllRecords, burnAllRecords,
+    getMetadata, getMetadata
   };
 }
 

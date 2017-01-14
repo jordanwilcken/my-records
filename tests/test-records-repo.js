@@ -2,44 +2,38 @@ function listMissingRecords() {
   return [];
 }
 
-function makeSomeRecords() {
-  return [
-    { "first record": "a record about squirrels" },
- 	{ "second record": "a record about dogs" },
-	{ "third record": "a biography" },
-	{ "fourth record": "a gossip column" }
-  ];
-}
 
-function tryGettingTheRecordsList() {
+function tryGettingTestRecords(testDB) {
   var
     recordsRepo,
-	someRecords = makeSomeRecords();
+    recordsRepoMetadata,
+    errors = [],
+    testDBMetadata = testDB.getRecordMetadata(),
+    recordsGateway = require('../records-gateway.js');
 
-  function setup() {
-    var 
-	  setupError,
-	  connectionString = require('config')
-		.get('connectionString');
-
+  function visitConnectionString(connectionString) {
     recordsRepo = require('../powershell-records-repo.js')
-      .makeRecordsRepo('connectionString');
-
-    setupError = recordsRepo.addRecords(someRecords);
-	if (setupError && setupError.length > 0)
-	  throw new Error("Failed to setup the get records list test.");
+	  .makeRecordsRepo(connectionString);
   }
 
-  setup();
+  testDB.acceptConnectionVisitor(visitConnectionString);
 
-  return []
-    .concat(listMissingRecords(recordsRepo, someRecords));
+  recordsRepoMetadata = recordsGateway.getMetadata(
+	recordsRepo.getMetadata());
+
+  if (!testDBMetadata.equals(recordsRepoMetadata))
+  	errors.push("Failed to get records from test database.");
+
+  return errors;
 }
 
 module.exports = function() {
-  var errors = [];
+  var
+    errors = [],
+	testDBPath = require('config').get('testDBPath');
+	testDB = require('./test-db.js')(testDBPath);
 
-  errors.concat(tryGettingTheRecordsList());
+  errors = errors.concat(tryGettingTestRecords(testDB));
 
   return errors;
 }
